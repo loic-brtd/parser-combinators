@@ -238,134 +238,68 @@ public final class Parsers {
         ).map(Triplet::second);
     }
 
-    public static <T> Function<Parser<? extends T>, Parser<List<T>>> sepBy(Parser<?> separatorParser) {
-        return valueParser -> new Parser<>(state -> {
-            if (state.isError()) return state.withSameError();
-
-            var nextState = state;
-            var error = (State<? extends T>) null;
-            var results = new ArrayList<T>();
-
-            while (true) {
-                var valState = valueParser.stateTransformer.apply(nextState);
-                var sepState = separatorParser.stateTransformer.apply(valState);
-
-                if (valState.isError()) {
-                    error = valState;
-                    break;
-                } else {
-                    results.add(valState.result);
-                }
-
-                if (sepState.isError()) {
-                    nextState = valState;
-                    break;
-                }
-
-                nextState = sepState;
-            }
-
-            if (error != null) {
-                if (results.isEmpty()) {
-                    return state.withResult(results);
-                }
-                return error.withSameError();
-            }
-
-            return nextState.withResult(results);
-        });
+    public static <T> Function<Parser<T>, Parser<List<T>>> sepBy(Parser<?> separatorParser) {
+        return valueParser -> new Parser<>(state -> sepByAux(valueParser, separatorParser, state));
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Function<Parser<? extends T>, Parser<List<T>>> atLeastOneSepBy(Parser<?> separatorParser) {
-        return valueParser -> new Parser<>(state -> {
-            if (state.isError()) return state.withSameError();
+    public static <T> Parser<List<T>> sepBy(Parser<T> valueParser, Parser<?> separatorParser) {
+        return new Parser<>(state -> sepByAux(valueParser, separatorParser, state));
+    }
 
-            var results = new ArrayList<T>();
-            var nextState = state;
+    private static <T> State<List<T>> sepByAux(Parser<T> valueParser, Parser<?> separatorParser, State<?> state) {
+        if (state.isError()) return state.withSameError();
 
-            while (true) {
-                var out = valueParser.stateTransformer.apply(nextState);
-                if (out.isError()) break;
-                // nextState is only updated if parser execution didn't fail with an Exception
-                nextState = out;
-                results.add((T) nextState.result);
-                // same here
-                nextState = separatorParser.stateTransformer.apply(nextState);
+        var nextState = state;
+        var error = (State<? extends T>) null;
+        var results = new ArrayList<T>();
+
+        while (true) {
+            var valState = valueParser.stateTransformer.apply(nextState);
+            var sepState = separatorParser.stateTransformer.apply(valState);
+
+            if (valState.isError()) {
+                error = valState;
+                break;
+            } else {
+                results.add(valState.result);
             }
 
+            if (sepState.isError()) {
+                nextState = valState;
+                break;
+            }
+
+            nextState = sepState;
+        }
+
+        if (error != null) {
             if (results.isEmpty()) {
-                return state.withError(fail("atLeastOneSepBy", state, "Unable to capture any results"));
+                return state.withResult(results);
             }
+            return error.withSameError();
+        }
 
-            return nextState.withResult(results);
-        });
+        return nextState.withResult(results);
     }
 
-    public static <T> Parser<List<T>> sepBy(Parser<? extends T> valueParser, Parser<?> separatorParser) {
-        return new Parser<>(state -> {
-            if (state.isError()) return state.withSameError();
-
-            var nextState = state;
-            var error = (State<? extends T>) null;
-            var results = new ArrayList<T>();
-
-            while (true) {
-                var valState = valueParser.stateTransformer.apply(nextState);
-                var sepState = separatorParser.stateTransformer.apply(valState);
-
-                if (valState.isError()) {
-                    error = valState;
-                    break;
-                } else {
-                    results.add(valState.result);
-                }
-
-                if (sepState.isError()) {
-                    System.out.println("sepState = " + sepState);
-                    System.out.println("valState = " + valState);
-                    nextState = valState;
-                    break;
-                }
-
-                nextState = sepState;
-            }
-
-            if (error != null) {
-                if (results.isEmpty()) {
-                    return state.withResult(results);
-                }
-                return error.withSameError();
-            }
-
-            return nextState.withResult(results);
-        });
+    public static <T> Function<Parser<T>, Parser<List<T>>> atLeastOneSepBy(Parser<?> separatorParser) {
+        return valueParser -> new Parser<>(state -> atLeastOneSepByAux(valueParser, separatorParser, state));
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Parser<List<T>> atLeastOneSepBy(Parser<? extends T> valueParser, Parser<?> separatorParser) {
-        return new Parser<>(state -> {
-            if (state.isError()) return state.withSameError();
+    public static <T> Parser<List<T>> atLeastOneSepBy(Parser<T> valueParser, Parser<?> separatorParser) {
+        return new Parser<>(state -> atLeastOneSepByAux(valueParser, separatorParser, state));
+    }
 
-            var results = new ArrayList<T>();
-            var nextState = state;
+    private static <T> State<List<T>> atLeastOneSepByAux(Parser<T> valueParser, Parser<?> separatorParser, State<?> state) {
+        if (state.isError()) return state.withSameError();
 
-            while (true) {
-                var out = valueParser.stateTransformer.apply(nextState);
-                if (out.isError()) break;
-                // nextState is only updated if parser execution didn't fail with an Exception
-                nextState = out;
-                results.add((T) nextState.result);
-                // same here
-                nextState = separatorParser.stateTransformer.apply(nextState);
-            }
+        var out = sepBy(valueParser, separatorParser).stateTransformer.apply(state);
+        if (out.isError()) return out.withSameError();
 
-            if (results.isEmpty()) {
-                return state.withError(fail("atLeastOneSepBy", state, "Unable to capture any results"));
-            }
-
-            return nextState.withResult(results);
-        });
+        if (out.result.isEmpty()) {
+            return state.withError(fail("atLeastOneSepBy", state, "Unable to capture any results"));
+        }
+        return out;
     }
 
     public static <T> Parser<T> lazy(Supplier<Parser<T>> parserSupplier) {

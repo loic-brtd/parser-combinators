@@ -1,4 +1,4 @@
-package org.lobertrand.parser;
+package fr.combine.parser;
 
 public class ParseException extends RuntimeException {
 

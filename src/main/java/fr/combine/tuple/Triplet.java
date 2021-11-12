@@ -2,6 +2,7 @@ package fr.combine.tuple;
 
 import fr.combine.util.Util;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -43,6 +44,6 @@ public class Triplet<A, B, C> implements Tuple {
 
     @Override
     public List<Object> toList() {
-        return List.of(first, second, third);
+        return Arrays.asList(first, second, third);
     }
 }

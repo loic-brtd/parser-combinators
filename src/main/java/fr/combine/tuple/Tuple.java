@@ -17,6 +17,10 @@ public interface Tuple extends Iterable<Object> {
         return toList().iterator();
     }
 
+    default Object get(int index) {
+        return toList().get(index);
+    }
+
     static <A> Mono<A> of(A first) {
         return new Mono<>(first);
     }

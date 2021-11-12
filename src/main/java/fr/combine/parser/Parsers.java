@@ -103,29 +103,30 @@ public final class Parsers {
         });
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes", "ArraysAsListWithZeroOrOneArgument"})
     public static <A> Parser<Mono<A>> sequenceOf(Parser<A> a) {
-        return (Parser) sequenceOf(List.of(a)).map(Util::dynamicTuple);
+        return (Parser) sequenceOf(Arrays.asList(a)).map(Util::dynamicTuple);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <A, B> Parser<Pair<A, B>> sequenceOf(Parser<A> a, Parser<B> b) {
-        return (Parser) sequenceOf(List.of(a, b)).map(Util::dynamicTuple);
+        return (Parser) sequenceOf(Arrays.asList(a, b)).map(Util::dynamicTuple);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <A, B, C> Parser<Triplet<A, B, C>> sequenceOf(Parser<A> a, Parser<B> b, Parser<C> c) {
-        return (Parser) sequenceOf(List.of(a, b, c)).map(Util::dynamicTuple);
+        return (Parser) sequenceOf(Arrays.asList(a, b, c)).map(Util::dynamicTuple);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <A, B, C, D> Parser<Quartet<A, B, C, D>> sequenceOf(Parser<A> a, Parser<B> b, Parser<C> c, Parser<D> d) {
-        return (Parser) sequenceOf(List.of(a, b, c, d)).map(Util::dynamicTuple);
+        return (Parser) sequenceOf(Arrays.asList(a, b, c, d)).map(Util::dynamicTuple);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <A, B, C, D, E> Parser<Quintet<A, B, C, D, E>> sequenceOf(Parser<A> a, Parser<B> b, Parser<C> c, Parser<D> d, Parser<E> e) {
-        return (Parser) sequenceOf(List.of(a, b, c, d, e)).map(Util::dynamicTuple);
+        var seqParser = sequenceOf(Arrays.asList(a, b, c, d, e));
+        return (Parser) seqParser.map(Util::dynamicTuple);
     }
 
     @SuppressWarnings("unchecked")
@@ -138,7 +139,6 @@ public final class Parsers {
 
             for (var p : parsers) {
                 var out = p.stateTransformer.apply(nextState);
-
                 if (out.isError()) {
                     return out.withSameError();
                 } else {
@@ -238,15 +238,15 @@ public final class Parsers {
         ).map(Triplet::second);
     }
 
-    public static <T> Function<Parser<T>, Parser<List<T>>> sepBy(Parser<?> separatorParser) {
+    public static <T> Function<Parser<? extends T>, Parser<List<T>>> sepBy(Parser<?> separatorParser) {
         return valueParser -> new Parser<>(state -> sepByAux(valueParser, separatorParser, state));
     }
 
-    public static <T> Parser<List<T>> sepBy(Parser<T> valueParser, Parser<?> separatorParser) {
+    public static <T> Parser<List<T>> sepBy(Parser<? extends T> valueParser, Parser<?> separatorParser) {
         return new Parser<>(state -> sepByAux(valueParser, separatorParser, state));
     }
 
-    private static <T> State<List<T>> sepByAux(Parser<T> valueParser, Parser<?> separatorParser, State<?> state) {
+    private static <T> State<List<T>> sepByAux(Parser<? extends T> valueParser, Parser<?> separatorParser, State<?> state) {
         if (state.isError()) return state.withSameError();
 
         var nextState = state;

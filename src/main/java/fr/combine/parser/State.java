@@ -27,8 +27,12 @@ public class State<T> {
         return new State<>(target, null, index, error);
     }
 
+    /**
+     * TODO: decide whether or not this unchecked cast is a good idea
+     */
+    @SuppressWarnings("unchecked")
     public <U> State<U> withSameError() {
-        return new State<>(target, null, index, error);
+        return new State<>(target, (U) result, index, error);
     }
 
     public boolean isError() {

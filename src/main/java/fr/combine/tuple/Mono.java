@@ -2,6 +2,7 @@ package fr.combine.tuple;
 
 import fr.combine.util.Util;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -26,9 +27,10 @@ public class Mono<A> implements Tuple {
         return Stream.of(first);
     }
 
+    @SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
     @Override
     public List<Object> toList() {
-        return List.of(first);
+        return Arrays.asList(first);
     }
 
 }

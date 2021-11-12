@@ -19,25 +19,26 @@ public class Parser<U> {
         return this.stateTransformer.apply(initialState);
     }
 
-    public <V> Parser<V> map(Function<U, V> fn) {
+    public <V> Parser<V> map(Function<U, V> mapper) {
         return new Parser<>(state -> {
-            if (state.isError()) return state.withSameError();
+            if (state.isError()) {
+                return state.withSameError();
+            }
 
             var nextState = this.stateTransformer.apply(state);
-            if (state.isError()) return state.withSameError();
-
-            return nextState.withResult(fn.apply(nextState.result));
+            if (nextState.isError()) return state.withSameError();
+            return nextState.withResult(mapper.apply(nextState.result));
         });
     }
 
-    public <V> Parser<? extends V> chain(Function<U, Parser<? extends V>> fn) {
+    public <V> Parser<? extends V> chain(Function<U, Parser<? extends V>> chainer) {
         return new Parser<>(state -> {
             if (state.isError()) return state.withSameError();
 
             var nextState = this.stateTransformer.apply(state);
             if (nextState.isError()) return nextState.withSameError();
 
-            var nextParser = fn.apply(nextState.result);
+            var nextParser = chainer.apply(nextState.result);
             return nextParser.stateTransformer.apply(nextState);
         });
     }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class EndOfInputTest {
+class ParsersTest_endOfInput {
 
     @Test
     public void startOfEmptyTarget_ok() {

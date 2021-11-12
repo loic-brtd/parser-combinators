@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-class StrTest {
+class ParsersTest_str {
 
     @Test
     public void emptyStringArgument_exception() {

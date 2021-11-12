@@ -2,6 +2,7 @@ package fr.combine.tuple;
 
 import fr.combine.util.Util;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -50,6 +51,6 @@ public class Quartet<A, B, C, D> implements Tuple {
 
     @Override
     public List<Object> toList() {
-        return List.of(first, second, third, fourth);
+        return Arrays.asList(first, second, third, fourth);
     }
 }

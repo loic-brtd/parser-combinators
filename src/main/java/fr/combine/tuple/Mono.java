@@ -4,6 +4,7 @@ import fr.combine.util.Util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Mono<A> implements Tuple {
@@ -33,4 +34,16 @@ public class Mono<A> implements Tuple {
         return Arrays.asList(first);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Mono<?> mono = (Mono<?>) o;
+        return Objects.equals(first, mono.first);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first);
+    }
 }

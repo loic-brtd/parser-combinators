@@ -16,32 +16,31 @@ class ParsersTest_str {
 
     @Test
     public void startOfEmptyTarget_parsingError() {
-        State<String> output = Parsers.str("a").run("");
+        State<String> output = Parsers.str("a")
+                                      .run("");
 
         assertThat(output.error).isNotNull();
         assertThat(output.result).isEqualTo(null);
-        assertThat(output.target).isEqualTo("");
         assertThat(output.index).isEqualTo(0);
     }
 
     @Test
     public void startOfNonEmptyTarget_ok() {
-        State<String> output = Parsers.str("hell").run("hello");
+        State<String> output = Parsers.str("hell")
+                                      .run("hello");
 
         assertThat(output.error).isNull();
         assertThat(output.result).isEqualTo("hell");
-        assertThat(output.target).isEqualTo("hello");
         assertThat(output.index).isEqualTo(4);
     }
 
     @Test
     public void endOfNonEmptyTarget_ok() {
-        State<String> initialState = new State<>("hello", "hell", 4, null);
-        State<String> output = Parsers.str("o").run(initialState);
+        State<String> output = Parsers.str("o")
+                                      .run(new State<>("hello", "hell", 4, null));
 
         assertThat(output.error).isNull();
         assertThat(output.result).isEqualTo("o");
-        assertThat(output.target).isEqualTo("hello");
         assertThat(output.index).isEqualTo(5);
     }
 

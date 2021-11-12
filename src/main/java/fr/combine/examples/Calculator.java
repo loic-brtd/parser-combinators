@@ -16,13 +16,13 @@ public class Calculator {
                 str("+"),
                 optSpacing
         ));
-        var parser = sequenceOf(
+        var parser = sequenceOf(List.of(
                 optSpacing,
                 sepBy(integer, operator).map(Calculator::sumIntegers),
                 optSpacing,
                 endOfInput()
-        ).map(elts -> elts.get(1));
-        var result = parser.run("30+ 45 + 2  t");
+        )).map(elts -> elts.get(1));
+        var result = parser.run("30+ 45 + 2  ");
         System.out.println(result);
 
     }

@@ -1,45 +1,43 @@
 package fr.combine.parser;
 
+import java.util.Objects;
 import java.util.function.Function;
 
-public class Parser<U> {
+@FunctionalInterface
+public interface Parser<U> {
 
-    protected Function<State<?>, State<U>> stateTransformer;
+    State<U> run(State<?> state);
 
-    public Parser(Function<State<?>, State<U>> parserStateTransformer) {
-        this.stateTransformer = parserStateTransformer;
+    default State<U> run(String target) {
+        return this.run(new State<Void>(target, null, 0, null));
     }
 
-    public State<U> run(String target) {
-        State<Void> initialState = new State<>(target, null, 0, null);
-        return this.stateTransformer.apply(initialState);
-    }
+    default <V> Parser<V> map(Function<U, V> mapper) {
+        Objects.requireNonNull(mapper, "mapper");
 
-    public State<U> run(State<?> initialState) {
-        return this.stateTransformer.apply(initialState);
-    }
-
-    public <V> Parser<V> map(Function<U, V> mapper) {
-        return new Parser<>(state -> {
+        return state -> {
             if (state.isError()) {
                 return state.withSameError();
             }
 
-            var nextState = this.stateTransformer.apply(state);
-            if (nextState.isError()) return state.withSameError();
+            var nextState = this.run(state);
+            if (nextState.isError()) return nextState.withSameError();
             return nextState.withResult(mapper.apply(nextState.result));
-        });
+        };
     }
 
-    public <V> Parser<? extends V> chain(Function<U, Parser<? extends V>> chainer) {
-        return new Parser<>(state -> {
+    @SuppressWarnings("unchecked")
+    default <V> Parser<? extends V> chain(Function<U, Parser<? extends V>> chainer) {
+        Objects.requireNonNull(chainer, "chainer");
+
+        return state -> {
             if (state.isError()) return state.withSameError();
 
-            var nextState = this.stateTransformer.apply(state);
+            var nextState = this.run(state);
             if (nextState.isError()) return nextState.withSameError();
 
             var nextParser = chainer.apply(nextState.result);
-            return nextParser.stateTransformer.apply(nextState);
-        });
+            return (State<V>) nextParser.run(nextState);
+        };
     }
 }

@@ -1,20 +1,27 @@
 package fr.combine.parser;
 
-public class LateInitParser<T> extends Parser<T> {
+import java.util.Objects;
 
-    private boolean initialized = false;
+public class LateInitParser<T> implements Parser<T> {
 
-    LateInitParser() {
-        super(state -> {
-            throw new IllegalStateException("LateInitParser not yet initialized");
-        });
-    }
+    private Parser<T> parser;
 
     public void is(Parser<T> parser) {
-        if (initialized) {
+        Objects.requireNonNull(parser, "parser");
+
+        if (this.parser != null) {
             throw new IllegalStateException("LateInitParser already initialized");
         }
-        stateTransformer = parser.stateTransformer;
-        initialized = true;
+        this.parser = parser;
+    }
+
+    @Override
+    public State<T> run(State<?> state) {
+        Objects.requireNonNull(state, "state");
+
+        if (this.parser == null) {
+            throw new IllegalStateException("LateInitParser not yet initialized");
+        }
+        return parser.run(state);
     }
 }

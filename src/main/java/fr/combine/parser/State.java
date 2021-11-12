@@ -2,6 +2,8 @@ package fr.combine.parser;
 
 import fr.combine.util.Util;
 
+import java.util.Objects;
+
 public class State<T> {
     public final String target;
     public final T result;
@@ -9,6 +11,8 @@ public class State<T> {
     public final String error;
 
     public State(String target, T result, int index, String error) {
+        Objects.requireNonNull(target, "target");
+
         this.target = target;
         this.result = result;
         this.index = index;
@@ -41,11 +45,11 @@ public class State<T> {
 
     @Override
     public String toString() {
-        return "State{" +
+        return "State(" +
                 "target=" + Util.repr(target) +
                 ", result=" + Util.repr(result) +
                 ", index=" + index +
                 ", error=" + Util.repr(error) +
-                '}';
+                ')';
     }
 }

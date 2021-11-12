@@ -4,6 +4,7 @@ import fr.combine.util.Util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Quintet<A, B, C, D, E> implements Tuple {
@@ -59,5 +60,18 @@ public class Quintet<A, B, C, D, E> implements Tuple {
     @Override
     public List<Object> toList() {
         return Arrays.asList(first, second, third, fourth, fifth);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Quintet<?, ?, ?, ?, ?> quintet = (Quintet<?, ?, ?, ?, ?>) o;
+        return Objects.equals(first, quintet.first) && Objects.equals(second, quintet.second) && Objects.equals(third, quintet.third) && Objects.equals(fourth, quintet.fourth) && Objects.equals(fifth, quintet.fifth);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(first, second, third, fourth, fifth);
     }
 }
